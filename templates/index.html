@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo de Cartas</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.1/socket.io.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <style>
+        button {
+            font-size: 18px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button.green {
+            background-color: #4CAF50;
+            color: white;
+        }
+        button.red {
+            background-color: #f44336;
+            color: white;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        .card {
+            width: 150px;
+            height: 200px;
+            background-color: #2196F3;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            margin: 10px;
+        }
+        #cardSection {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #playersContainer {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Jogo de Cartas</h1>
+    <div id="game">
+        <input type="text" id="playerName" placeholder="Seu nome">
+        <button class="green" id="joinButton" onclick="joinGame()">Entrar no jogo</button>
+        <div id="cardSection" style="display:none;">
+            <div id="card" class="card"></div>
+            <button class="green" id="revealButton" onclick="revealCard()">Revelar Carta</button>
+        </div>
+        <button class="red" id="resetButton" onclick="resetGame()" style="margin-top: 20px;">Resetar Jogo</button>
+        <h2>Jogadores</h2>
+        <div id="playersContainer"></div>
+    </div>
+
+    <script>
+        const socket = io();
+
+        function joinGame() {
+            const name = document.getElementById('playerName').value;
+            if (!name) {
+                alert('Por favor, insira seu nome.');
+                return;
+            }
+            socket.emit('join', { name });
+            document.getElementById('joinButton').style.display = 'none';
+            document.getElementById('playerName').disabled = true;
+        }
+
+        function revealCard() {
+            const name = document.getElementById('playerName').value;
+            socket.emit('reveal_card', { name });
+        }
+
+        function resetGame() {
+            socket.emit('reset_game');
+        }
+
+        socket.on('your_card', (data) => {
+            document.getElementById('cardSection').style.display = 'block';
+            document.getElementById('card').textContent = data.card;
+        });
+
+        socket.on('update_state', (state) => {
+            const playersContainer = document.getElementById('playersContainer');
+            playersContainer.innerHTML = '';
+
+            for (const playerName of state.order) {
+                const playerData = state.players[playerName];
+                const playerCard = document.createElement('div');
+                playerCard.className = 'card';
+
+                if (playerData.revealed) {
+                    playerCard.textContent = playerData.card;
+                } else {
+                    playerCard.textContent = playerName;
+                }
+
+                playersContainer.appendChild(playerCard);
+            }
+
+            new Sortable(playersContainer, {
+                animation: 150,
+                ghostClass: 'sortable-ghost',
+                onEnd: (evt) => {
+                    const order = [...playersContainer.children].map(card => card.textContent.trim());
+                    socket.emit('update_positions', { order });
+                },
+            });
+        });
+
+        socket.on('game_reset', () => {
+            document.getElementById('playerName').value = '';
+            document.getElementById('playerName').disabled = false;
+            document.getElementById('joinButton').style.display = 'block';
+            document.getElementById('cardSection').style.display = 'none';
+            document.getElementById('card').textContent = '';
+            document.getElementById('playersContainer').innerHTML = '';
+            alert('O jogo foi resetado! Entre novamente para jogar.');
+        });
+    </script>
+</body>
+</html>
