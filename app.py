@@ -164,5 +164,4 @@ def handle_update_positions(data):
     emit('update_state', game_state, room="game")
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True, allow_unsafe_werkzeug=True)
-
+    socketio.run(app, host='192.168.1.100', port=5111, debug=True)

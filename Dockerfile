@@ -17,7 +17,7 @@ RUN pip install --no-cache-dir flask flask_socketio
 RUN git clone https://github.com/AndersonSheep/ito_game_online .
 
 # Expor a porta 5000 para o Flask
-EXPOSE 5000
+EXPOSE 5111
 
 # Comando para iniciar o servidor
 CMD ["python", "app.py"]
