@@ -66,6 +66,14 @@
             text-align: center;
             font-weight: bold;
         }
+
+        .version {
+            position: absolute; /* Remove o elemento do fluxo normal */
+            top: 10px;        /* Distância do topo */
+            right: 10px;       /* Distância da direita */
+            font-size: 12px;   /* Tamanho da fonte (opcional) */
+            color: #888;       /* Cor do texto (opcional) */
+        }
     </style>
 </head>
 <body>
@@ -80,6 +88,7 @@
         <h2>Jogadores</h2>
         <div id="playersContainer"></div>
     </div>
+    <div class="version">Version 1.1.0</div>
 
     <div id="caixa"><br>Clique aqui para<br>gerar um tema!</div>
     <div id="resultado"></div>

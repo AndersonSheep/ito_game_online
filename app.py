@@ -149,7 +149,8 @@ def assign_card_to_player(player_name):
 def handle_reveal(data):
     player_name = data['name']
     if player_name in game_state["players"]:
-        game_state["players"][player_name]["revealed"] = True
+        card_name_value = f'{player_name}: {game_state["players"][player_name]["card"]}'
+        game_state["players"][player_name] = {"card": f"{card_name_value}", "revealed": True}
         emit('update_state', game_state, room="game")
 
 @socketio.on('reset_game')
